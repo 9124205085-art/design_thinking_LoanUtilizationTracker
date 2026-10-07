@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --color-mist: #f4f8f8;
+  --color-ink: #14343a;
+  --color-muted: #3e585f;
+  --color-line: #d3e2e4;
+  --color-brand: #0f766e;
+  --color-brand-dark: #115e59;
+  --color-sea: #e7f4f3;
+  --color-good: #166534;
+  --color-good-bg: #e9f8ef;
+  --color-warn: #92400e;
+  --color-warn-bg: #fff6db;
+  --color-bad: #991b1b;
+  --color-bad-bg: #fdecec;
+  --font-sans: "Segoe UI", "Nirmala UI", "Noto Sans Tamil", "Noto Sans Devanagari", "Noto Sans", sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: #f4f8f8;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 640px) {
+  body {
+    background: #d5e3e4;
+  }
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 280ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation: none;
+  }
+}
