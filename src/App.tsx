@@ -8,6 +8,7 @@ import { ExpenseDetailPage } from './pages/ExpenseDetailPage.tsx'
 import { ExpenseFormPage } from './pages/ExpenseFormPage.tsx'
 import { ExpensesPage } from './pages/ExpensesPage.tsx'
 import { HomePage } from './pages/HomePage.tsx'
+import { RepaymentDetailPage, RepaymentsPage } from './pages/RepaymentsPage.tsx'
 import { ReportPage } from './pages/ReportPage.tsx'
 import { SettingsPage } from './pages/SettingsPage.tsx'
 import { SetupPage } from './pages/SetupPage.tsx'
@@ -23,6 +24,7 @@ export default function App() {
     <Routes>
       <Route path="/bank" element={<BankPage />} />
       <Route path="/setup" element={<SetupPage />} />
+      <Route path="/setup/new" element={<SetupPage />} />
       <Route element={<RequireLoan />}>
         <Route element={<AppShell />}>
           <Route path="/" element={<HomePage />} />
@@ -33,6 +35,8 @@ export default function App() {
           <Route path="/disbursements" element={<DisbursementsPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/report" element={<ReportPage />} />
+          <Route path="/repayments" element={<RepaymentsPage />} />
+          <Route path="/repayments/:id" element={<RepaymentDetailPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { createContext, useContext } from 'react'
-import type { AppData, Disbursement, Expense, Lang, Loan } from '../types.ts'
+import type { AppData, Disbursement, Expense, Lang, Loan, TrackedLoan } from '../types.ts'
 import { buildDemo } from '../lib/demo.ts'
 import type { StringKey } from '../lib/i18n.ts'
 import { translate } from '../lib/i18n.ts'
 import { EMPTY_DATA, loadData, saveData } from '../lib/storage.ts'
 
 interface AppContextValue {
+  loans: TrackedLoan[]
   loan: Loan | null
   disbursements: Disbursement[]
   expenses: Expense[]
@@ -16,7 +17,9 @@ interface AppContextValue {
   t: (key: StringKey, vars?: Record<string, string | number>) => string
   notify: (message: string) => void
   setLanguage: (language: Lang) => void
+  selectLoan: (id: string) => void
   saveLoan: (loan: Loan) => void
+  deleteLoan: (id: string) => void
   addDisbursement: (item: Disbursement) => void
   deleteDisbursement: (id: string) => void
   saveExpense: (expense: Expense) => void
@@ -26,6 +29,13 @@ interface AppContextValue {
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
+
+function mapActive(data: AppData, update: (item: TrackedLoan) => TrackedLoan): AppData {
+  return {
+    ...data,
+    loans: data.loans.map((item) => (item.loan.id === data.activeLoanId ? update(item) : item)),
+  }
+}
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData>(() => loadData())
@@ -61,36 +71,72 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [data.language],
   )
 
+  const active = data.loans.find((item) => item.loan.id === data.activeLoanId) ?? null
+
   const value = useMemo<AppContextValue>(() => {
     return {
-      loan: data.loan,
-      disbursements: data.disbursements,
-      expenses: data.expenses,
+      loans: data.loans,
+      loan: active?.loan ?? null,
+      disbursements: active?.disbursements ?? [],
+      expenses: active?.expenses ?? [],
       language: data.language,
       flash,
       t,
       notify,
       setLanguage: (language) => setData((current) => ({ ...current, language })),
-      saveLoan: (loan) => setData((current) => ({ ...current, loan })),
-      addDisbursement: (item) => setData((current) => ({ ...current, disbursements: [...current.disbursements, item] })),
-      deleteDisbursement: (id) =>
-        setData((current) => ({ ...current, disbursements: current.disbursements.filter((item) => item.id !== id) })),
-      saveExpense: (expense) =>
+      selectLoan: (id) => setData((current) => ({ ...current, activeLoanId: id })),
+      saveLoan: (loan) =>
         setData((current) => {
-          const exists = current.expenses.some((item) => item.id === expense.id)
+          const exists = current.loans.some((item) => item.loan.id === loan.id)
+          if (exists) {
+            return {
+              ...current,
+              activeLoanId: loan.id,
+              loans: current.loans.map((item) => (item.loan.id === loan.id ? { ...item, loan } : item)),
+            }
+          }
           return {
             ...current,
-            expenses: exists ? current.expenses.map((item) => (item.id === expense.id ? expense : item)) : [...current.expenses, expense],
+            activeLoanId: loan.id,
+            loans: [...current.loans, { loan, disbursements: [], expenses: [] }],
           }
         }),
-      deleteExpense: (id) => setData((current) => ({ ...current, expenses: current.expenses.filter((item) => item.id !== id) })),
+      deleteLoan: (id) =>
+        setData((current) => {
+          const loans = current.loans.filter((item) => item.loan.id !== id)
+          const activeLoanId = current.activeLoanId === id ? (loans[0]?.loan.id ?? null) : current.activeLoanId
+          return { ...current, loans, activeLoanId }
+        }),
+      addDisbursement: (item) =>
+        setData((current) => mapActive(current, (record) => ({ ...record, disbursements: [...record.disbursements, item] }))),
+      deleteDisbursement: (id) =>
+        setData((current) =>
+          mapActive(current, (record) => ({ ...record, disbursements: record.disbursements.filter((item) => item.id !== id) })),
+        ),
+      saveExpense: (expense) =>
+        setData((current) =>
+          mapActive(current, (record) => {
+            const exists = record.expenses.some((item) => item.id === expense.id)
+            return {
+              ...record,
+              expenses: exists ? record.expenses.map((item) => (item.id === expense.id ? expense : item)) : [...record.expenses, expense],
+            }
+          }),
+        ),
+      deleteExpense: (id) =>
+        setData((current) => mapActive(current, (record) => ({ ...record, expenses: record.expenses.filter((item) => item.id !== id) }))),
       loadDemo: () => {
-        setData(buildDemo(data.language))
+        const sample = buildDemo()
+        setData((current) => ({
+          ...current,
+          loans: [...current.loans, sample],
+          activeLoanId: sample.loan.id,
+        }))
         notify(translate(data.language, 'demoLoaded'))
       },
       reset: () => setData({ ...EMPTY_DATA, language: data.language }),
     }
-  }, [data, flash, notify, t])
+  }, [active, data, flash, notify, t])
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

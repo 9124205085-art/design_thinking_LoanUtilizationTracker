@@ -13,7 +13,7 @@ export function AlertsPage() {
 
   return (
     <div className="space-y-3">
-      <TopBar title={t('alertsTitle')} />
+      <TopBar title={t('alertsTitle')} subtitle={loan.nickname} />
       {alerts.length === 0 ? (
         <EmptyState title={t('alertsEmpty')} body={t('alertsEmptyHint')} />
       ) : (

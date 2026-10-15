@@ -76,7 +76,7 @@ export function Card({ children, className = '' }: { children: ReactNode; classN
   return <section className={`rounded-3xl bg-white p-4 shadow-[0_8px_24px_rgba(20,52,58,0.05)] ring-1 ring-[#14343a]/5 ${className}`}>{children}</section>
 }
 
-export function TopBar({ title, to }: { title: string; to?: string }) {
+export function TopBar({ title, to, subtitle }: { title: string; to?: string; subtitle?: string }) {
   const { t } = useApp()
   return (
     <header className="mb-4 flex items-center gap-2">
@@ -85,7 +85,10 @@ export function TopBar({ title, to }: { title: string; to?: string }) {
           <IconBack />
         </Link>
       ) : null}
-      <h1 className="text-[1.7rem] leading-tight font-semibold">{title}</h1>
+      <div className="min-w-0">
+        <h1 className="text-[1.7rem] leading-tight font-semibold">{title}</h1>
+        {subtitle ? <p className="text-[16px] font-semibold text-brand">{subtitle}</p> : null}
+      </div>
     </header>
   )
 }
@@ -172,7 +175,7 @@ export function PhoneShell({
             <p className="rounded-2xl bg-ink px-4 py-3 text-[16px] leading-snug text-white shadow-lg">{flash}</p>
           </div>
         ) : null}
-        <div className={`flex-1 overflow-y-auto px-4 pt-5 ${fab ? 'pb-28' : 'pb-8'}`}>{children}</div>
+        <div className={`flex-1 overflow-y-auto px-4 pt-5 ${fab ? 'pb-52' : 'pb-8'}`}>{children}</div>
         {fab}
         {footer}
       </div>

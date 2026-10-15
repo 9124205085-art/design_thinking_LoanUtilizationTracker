@@ -45,7 +45,7 @@ export function DisbursementsPage() {
 
   return (
     <div className="space-y-4">
-      <TopBar title={t('disbursements')} to="/" />
+      <TopBar title={t('disbursements')} to="/" subtitle={loan.nickname} />
       <p className="text-[17px] leading-snug text-muted">{t('disbursementsHint')}</p>
       <Card>
         <Row label={t('received')} value={formatINR(received)} />

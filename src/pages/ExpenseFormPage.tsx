@@ -52,7 +52,7 @@ export function ExpenseFormPage() {
   if (id && !existing) {
     return (
       <div>
-        <TopBar title={t('editExpenseTitle')} to="/expenses" />
+        <TopBar title={t('editExpenseTitle')} to="/expenses" subtitle={loan.nickname} />
         <p>{t('billMissing')}</p>
       </div>
     )
@@ -146,7 +146,7 @@ export function ExpenseFormPage() {
 
   return (
     <div className="space-y-4">
-      <TopBar title={existing ? t('editExpenseTitle') : t('addExpenseTitle')} to={existing ? `/expenses/${existing.id}` : '/'} />
+      <TopBar title={existing ? t('editExpenseTitle') : t('addExpenseTitle')} to={existing ? `/expenses/${existing.id}` : '/'} subtitle={loan.nickname} />
       <form
         className="space-y-4"
         onSubmit={(event) => {

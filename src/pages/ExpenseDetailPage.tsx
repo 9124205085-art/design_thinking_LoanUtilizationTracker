@@ -18,7 +18,7 @@ export function ExpenseDetailPage() {
   if (!expense) {
     return (
       <div>
-        <TopBar title={t('billDetails')} to="/expenses" />
+        <TopBar title={t('billDetails')} to="/expenses" subtitle={loan.nickname} />
         <p className="text-[17px]">{t('billMissing')}</p>
         <Link to="/expenses" className="mt-4 inline-flex min-h-12 items-center font-semibold text-brand">
           {t('bills')}
@@ -37,7 +37,7 @@ export function ExpenseDetailPage() {
 
   return (
     <div className="space-y-4">
-      <TopBar title={t('billDetails')} to="/expenses" />
+      <TopBar title={t('billDetails')} to="/expenses" subtitle={loan.nickname} />
       <Card>
         <div className="flex items-start justify-between gap-3">
           <div>

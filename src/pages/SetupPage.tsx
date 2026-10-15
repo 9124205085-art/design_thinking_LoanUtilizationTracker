@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext.tsx'
 import { suggestCategories } from '../lib/categories.ts'
 import { uid } from '../lib/id.ts'
@@ -9,6 +9,7 @@ import type { StringKey } from '../lib/i18n.ts'
 import { Button, Card, Choice, Field, inputClass, Modal, PhoneShell } from '../components/ui.tsx'
 
 interface Draft {
+  nickname: string
   borrowerName: string
   bankName: string
   loanType: LoanType
@@ -30,6 +31,7 @@ const TYPES: { id: LoanType; label: StringKey }[] = [
 function fromLoan(loan: Loan | null): Draft {
   if (!loan) {
     return {
+      nickname: '',
       borrowerName: '',
       bankName: 'SBI',
       loanType: 'education',
@@ -42,6 +44,7 @@ function fromLoan(loan: Loan | null): Draft {
     }
   }
   return {
+    nickname: loan.nickname,
     borrowerName: loan.borrowerName,
     bankName: loan.bankName,
     loanType: loan.loanType,
@@ -55,12 +58,19 @@ function fromLoan(loan: Loan | null): Draft {
 }
 
 export function SetupPage() {
-  const { loan, expenses, t, saveLoan, loadDemo } = useApp()
+  const { loan, loans, expenses, t, saveLoan, loadDemo } = useApp()
   const navigate = useNavigate()
-  const editing = Boolean(loan)
+  const creating = useLocation().pathname.endsWith('/new')
+  const source = creating ? null : loan
+  const editing = Boolean(source)
+  const [editingId] = useState(() => (creating ? '' : (loan?.id ?? '')))
   const [step, setStep] = useState<1 | 2>(1)
-  const [draft, setDraft] = useState<Draft>(() => fromLoan(loan))
-  const [keepCategories, setKeepCategories] = useState(Boolean(loan))
+  const [draft, setDraft] = useState<Draft>(() => {
+    const next = fromLoan(creating ? null : loan)
+    if (creating && loan) next.borrowerName = loan.borrowerName
+    return next
+  })
+  const [keepCategories, setKeepCategories] = useState(Boolean(source))
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [categoryNote, setCategoryNote] = useState('')
   const [askDemo, setAskDemo] = useState(false)
@@ -75,6 +85,7 @@ export function SetupPage() {
 
   function validateStep1(): Record<string, string> {
     const next: Record<string, string> = {}
+    if (!draft.nickname.trim()) next.nickname = t('required')
     if (!draft.borrowerName.trim()) next.borrowerName = t('required')
     if (!draft.bankName.trim()) next.bankName = t('required')
     const amount = toNumber(draft.sanctionedAmount)
@@ -119,6 +130,8 @@ export function SetupPage() {
     setErrors(next)
     if (Object.keys(next).length > 0) return
     saveLoan({
+      id: editingId || uid(),
+      nickname: draft.nickname.trim(),
       borrowerName: draft.borrowerName.trim(),
       bankName: draft.bankName.trim(),
       loanType: draft.loanType,
@@ -137,7 +150,7 @@ export function SetupPage() {
   }
 
   function startDemo() {
-    if (loan || expenses.length > 0) {
+    if (loans.length > 0) {
       setAskDemo(true)
       return
     }
@@ -148,8 +161,13 @@ export function SetupPage() {
   return (
     <PhoneShell>
       <p className="text-[16px] font-semibold tracking-wide text-brand">{t('appName')}</p>
-      <h1 className="mt-1 text-[1.8rem] leading-tight font-semibold">{editing ? t('editLoanTitle') : t('welcomeTitle')}</h1>
-      <p className="mt-2 text-[17px] leading-snug text-muted">{editing ? t('editLoanBody') : t('welcomeBody')}</p>
+      {loans.length > 0 ? (
+        <Link to="/" className="mt-2 inline-flex min-h-11 items-center text-[16px] font-semibold text-brand">
+          {t('back')}
+        </Link>
+      ) : null}
+      <h1 className="mt-1 text-[1.8rem] leading-tight font-semibold">{creating ? t('addLoanTitle') : editing ? t('editLoanTitle') : t('welcomeTitle')}</h1>
+      <p className="mt-2 text-[17px] leading-snug text-muted">{creating ? t('addLoanBody') : editing ? t('editLoanBody') : t('welcomeBody')}</p>
 
       <div className="mt-4 grid grid-cols-2 gap-2" aria-hidden="true">
         <p className={`rounded-full px-3 py-2 text-center text-[16px] font-semibold ${step === 1 ? 'bg-brand text-white' : 'bg-white text-muted'}`}>{t('stepLoan')}</p>
@@ -164,6 +182,9 @@ export function SetupPage() {
             continueToPlan()
           }}
         >
+          <Field label={t('loanNickname')} hint={t('loanNicknameHint')} error={errors.nickname}>
+            <input className={inputClass} value={draft.nickname} onChange={(event) => update('nickname', event.target.value)} />
+          </Field>
           <Field label={t('yourName')} error={errors.borrowerName}>
             <input className={inputClass} value={draft.borrowerName} onChange={(event) => update('borrowerName', event.target.value)} autoComplete="name" />
           </Field>
@@ -186,7 +207,7 @@ export function SetupPage() {
                 </Choice>
               ))}
             </div>
-            {loan && draft.loanType !== loan.loanType && expenses.length > 0 ? <p className="mt-2 text-[16px] leading-snug text-warn">{t('changedTypeHint')}</p> : null}
+            {source && draft.loanType !== source.loanType && expenses.length > 0 ? <p className="mt-2 text-[16px] leading-snug text-warn">{t('changedTypeHint')}</p> : null}
           </fieldset>
           <Field label={t('sanctionedAmount')} error={errors.sanctionedAmount}>
             <input className={inputClass} inputMode="decimal" value={draft.sanctionedAmount} onChange={(event) => update('sanctionedAmount', event.target.value)} placeholder="500000" />

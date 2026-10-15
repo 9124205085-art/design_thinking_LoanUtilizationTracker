@@ -13,6 +13,8 @@ export interface CategoryBudget {
 }
 
 export interface Loan {
+  id: string
+  nickname: string
   borrowerName: string
   bankName: string
   loanType: LoanType
@@ -22,6 +24,12 @@ export interface Loan {
   emi: number
   sanctionDate: string
   categories: CategoryBudget[]
+}
+
+export interface TrackedLoan {
+  loan: Loan
+  disbursements: Disbursement[]
+  expenses: Expense[]
 }
 
 export interface Disbursement {
@@ -53,8 +61,7 @@ export interface Expense {
 }
 
 export interface AppData {
-  loan: Loan | null
-  disbursements: Disbursement[]
-  expenses: Expense[]
+  loans: TrackedLoan[]
+  activeLoanId: string | null
   language: Lang
 }

@@ -37,7 +37,7 @@ export function ExpensesPage() {
 
   return (
     <div className="space-y-4">
-      <TopBar title={t('billsTitle')} />
+      <TopBar title={t('billsTitle')} subtitle={loan.nickname} />
       <div>
         <p className="mb-2 text-[16px] font-semibold">{t('filterStatus')}</p>
         <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={t('filterStatus')}>

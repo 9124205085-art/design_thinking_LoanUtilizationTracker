@@ -6,6 +6,15 @@ export function IconHome() {
   )
 }
 
+export function IconRepay() {
+  return (
+    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="4" y="5" width="16" height="15" rx="2" />
+      <path d="M4 9.5h16M8 3.5v3M16 3.5v3M8 13h3.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export function IconBills() {
   return (
     <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">

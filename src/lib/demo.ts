@@ -1,4 +1,4 @@
-import type { AppData, Expense, Lang } from '../types.ts'
+import type { Expense, TrackedLoan } from '../types.ts'
 import { addDays, addMonths, dateAtNoon, daysFromToday, nextEmiDate, parseISODate, startOfToday, toISODate } from './dates.ts'
 import { makeReceiptImage } from './images.ts'
 import { uid } from './id.ts'
@@ -24,7 +24,7 @@ function onOrBeforeToday(date: Date, today: Date): string {
   return toISODate(date)
 }
 
-export function buildDemo(language: Lang): AppData {
+export function buildDemo(): TrackedLoan {
   const tenureMonths = 60
   const sanctionedAmount = 500000
   const interestRate = 8.5
@@ -185,8 +185,9 @@ export function buildDemo(language: Lang): AppData {
   if (second.getTime() > today.getTime()) second = addDays(today, -10)
 
   return {
-    language,
     loan: {
+      id: uid(),
+      nickname: 'SBI education loan',
       borrowerName: 'Ananya R.',
       bankName: 'SBI',
       loanType: 'education',

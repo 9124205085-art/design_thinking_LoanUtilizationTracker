@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext.tsx'
 import { Button, Card, TopBar } from '../components/ui.tsx'
 
 export function ReportPage() {
-  const { loan, disbursements, expenses, language, t, notify } = useApp()
+  const { loan, disbursements, expenses, t, notify } = useApp()
   const reportRef = useRef<jsPDF | null>(null)
   const [working, setWorking] = useState(false)
   const [ready, setReady] = useState(false)
@@ -16,7 +16,7 @@ export function ReportPage() {
     setWorking(true)
     try {
       const { buildReport } = await import('../lib/pdf.ts')
-      reportRef.current = buildReport({ loan: currentLoan, disbursements, expenses, language })
+      reportRef.current = buildReport({ loan: currentLoan, disbursements, expenses })
       setReady(true)
       notify(t('reportReady'))
     } finally {
@@ -26,7 +26,7 @@ export function ReportPage() {
 
   return (
     <div className="space-y-4">
-      <TopBar title={t('reportTitle')} to="/" />
+      <TopBar title={t('reportTitle')} to="/" subtitle={loan.nickname} />
       <Card>
         <p className="text-[17px] leading-snug">{t('reportHint')}</p>
         <p className="mt-3 text-[16px] leading-snug text-muted">{t('reportEnglish')}</p>

@@ -1,6 +1,6 @@
 import { jsPDF } from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import type { AppData, Expense } from '../types.ts'
+import type { Disbursement, Expense, Loan } from '../types.ts'
 import { formatDate } from './dates.ts'
 import { formatPlain } from './money.ts'
 import { buildAlerts, categoryName, expenseStatus, roundScore, spentByCategory, totalReceived, totalSpent, utilizationScore } from './stats.ts'
@@ -40,9 +40,8 @@ export function reportFilename(name: string): string {
   return `LoanTrack-${safe}-${day}.pdf`
 }
 
-export function buildReport(data: AppData): jsPDF {
+export function buildReport(data: { loan: Loan; expenses: Expense[]; disbursements: Disbursement[] }): jsPDF {
   const loan = data.loan
-  if (!loan) throw new Error('No loan')
   const doc = new jsPDF({ unit: 'mm', format: 'a4', compress: true }) as DocWithTable
   const margin = 14
   const pageWidth = doc.internal.pageSize.getWidth()
@@ -70,6 +69,7 @@ export function buildReport(data: AppData): jsPDF {
   y += 7
   const summary = [
     `Borrower: ${pdfText(loan.borrowerName)}`,
+    `Loan name: ${pdfText(loan.nickname)}`,
     `Bank: ${pdfText(loan.bankName)}`,
     `Purpose: ${loan.loanType}`,
     `Loan amount: Rs ${rupees(loan.sanctionedAmount)}`,

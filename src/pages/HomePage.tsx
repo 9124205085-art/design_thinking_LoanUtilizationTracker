@@ -17,7 +17,7 @@ const TYPE_LABEL: Record<LoanType, StringKey> = {
 }
 
 export function HomePage() {
-  const { loan, expenses, disbursements, t, language } = useApp()
+  const { loan, loans, expenses, disbursements, t, language, selectLoan } = useApp()
   if (!loan) return null
 
   const spent = totalSpent(expenses)
@@ -48,10 +48,39 @@ export function HomePage() {
       <header>
         <p className="text-[16px] font-semibold text-brand">{t('appName')}</p>
         <h1 className="text-[1.8rem] leading-tight font-semibold">{t('helloName', { name: firstName })}</h1>
+        <p className="mt-1 text-[1.15rem] font-semibold">{loan.nickname}</p>
         <p className="mt-1 text-[16px] text-muted">
           {loan.bankName} · {t(TYPE_LABEL[loan.loanType])} · {formatINR(loan.emi)} / {t('monthShort')}
         </p>
       </header>
+
+      <Card>
+        <h2 className="text-[1.2rem] font-semibold">{t('yourLoans')}</h2>
+        <ul className="mt-3 space-y-2">
+          {loans.map((item) => {
+            const selected = item.loan.id === loan.id
+            return (
+              <li key={item.loan.id}>
+                <button
+                  type="button"
+                  aria-pressed={selected}
+                  className={`w-full rounded-2xl px-3 py-3 text-left ${selected ? 'bg-sea ring-2 ring-brand' : 'bg-mist ring-1 ring-line'}`}
+                  onClick={() => selectLoan(item.loan.id)}
+                >
+                  <span className="block text-[17px] font-semibold">{item.loan.nickname}</span>
+                  <span className="mt-1 block text-[16px] text-muted">
+                    {item.loan.bankName} · {t(TYPE_LABEL[item.loan.loanType])} · {formatINR(item.loan.sanctionedAmount)}
+                  </span>
+                  {selected ? <span className="mt-1 block text-[16px] font-semibold text-brand">{t('currentLoan')}</span> : null}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+        <Link to="/setup/new" className="mt-3 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-brand px-4 text-[17px] font-semibold text-white">
+          {t('addLoan')}
+        </Link>
+      </Card>
 
       <Card>
         <Metric label={t('loanAmount')} value={formatINR(loan.sanctionedAmount)} />
@@ -115,7 +144,18 @@ export function HomePage() {
         <h2 className="text-[1.2rem] font-semibold">{t('nextPayment')}</h2>
         <p className="mt-1 text-[1.4rem] font-semibold">{formatINR(loan.emi)}</p>
         <p className="mt-1 text-[16px] text-muted">{dueText}</p>
+        <Link to={`/repayments/${loan.id}`} className="mt-3 inline-flex min-h-11 items-center text-[16px] font-semibold text-brand">
+          {t('seeMonths')}
+        </Link>
       </Card>
+
+      <Link to="/repayments" className="block">
+        <Card>
+          <h2 className="text-[1.2rem] font-semibold">{t('repaymentTitle')}</h2>
+          <p className="mt-1 text-[16px] leading-snug text-muted">{t('repaymentHint')}</p>
+          <p className="mt-2 text-[16px] font-semibold text-brand">{t('yourLoans')}</p>
+        </Card>
+      </Link>
 
       <Link to="/disbursements" className="block">
         <Card>
